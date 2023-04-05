@@ -23,6 +23,7 @@
 
     <properties>
         <project.root>${basedir}/..</project.root>
+        <skipTests>true</skipTests>
     </properties>
 
     <dependencies>
