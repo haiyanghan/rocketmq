@@ -1644,11 +1644,13 @@ public class BrokerController {
         TopicConfigAndMappingSerializeWrapper topicConfigSerializeWrapper = new TopicConfigAndMappingSerializeWrapper();
         topicConfigSerializeWrapper.setDataVersion(dataVersion);
 
+        // read and write
+        final boolean rw = PermName.isWriteable(this.getBrokerConfig().getBrokerPermission())
+                && PermName.isReadable(this.getBrokerConfig().getBrokerPermission());
         ConcurrentMap<String, TopicConfig> topicConfigTable = topicConfigList.stream()
             .map(topicConfig -> {
                 TopicConfig registerTopicConfig;
-                if (!PermName.isWriteable(this.getBrokerConfig().getBrokerPermission())
-                    || !PermName.isReadable(this.getBrokerConfig().getBrokerPermission())) {
+                if (!rw) {
                     registerTopicConfig =
                         new TopicConfig(topicConfig.getTopicName(),
                             topicConfig.getReadQueueNums(),
@@ -1666,7 +1668,8 @@ public class BrokerController {
             .map(TopicConfig::getTopicName)
             .map(topicName -> Optional.ofNullable(this.topicQueueMappingManager.getTopicQueueMapping(topicName))
                 .map(info -> new AbstractMap.SimpleImmutableEntry<>(topicName, TopicQueueMappingDetail.cloneAsMappingInfo(info)))
-                .orElse(null))
+                .orElse(null)
+            )
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (!topicQueueMappingInfoMap.isEmpty()) {
