@@ -17,6 +17,7 @@
 package org.apache.rocketmq.example.quickstart;
 
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -55,12 +56,12 @@ public class Consumer {
         /*
          * Specify where to start in case the specific consumer group is a brand-new one.
          */
-        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_MIN_OFFSET);
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
 
         /*
          * Subscribe one more topic to consume.
          */
-        consumer.subscribe(TOPIC, "*");
+        consumer.subscribe(TOPIC, MessageSelector.byTag("TagA"));
 
         /*
          *  Register callback to execute on arrival of messages fetched from brokers.

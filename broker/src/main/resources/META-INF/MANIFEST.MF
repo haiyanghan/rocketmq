@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Main-Class: org.apache.rocketmq.broker.BrokerStartup
+Class-Path: kotlin-stdlib-jdk7-1.5.31.jar kotlin-stdlib-jdk8-1.5.31.jar 
+ opentelemetry-sdk-trace-1.19.0.jar opentelemetry-sdk-1.19.0.jar opentel
+ emetry-exporter-otlp-common-1.19.0.jar grpc-core-1.50.0.jar opentelemet
+ ry-semconv-1.19.0-alpha.jar checker-qual-3.12.0.jar opentelemetry-sdk-m
+ etrics-1.19.0.jar commons-validator-1.7.jar bcprov-jdk15on-1.69.jar fai
+ lureaccess-1.0.1.jar annotations-13.0.jar commons-codec-1.13.jar common
+ s-io-2.7.jar okhttp-4.10.0.jar annotations-4.1.1.4.jar zstd-jni-1.5.2-2
+ .jar opentelemetry-sdk-logs-1.19.0-alpha.jar fastjson-1.2.83.jar hamcre
+ st-2.1.jar rocketmq-logback-classic-1.0.1.jar j2objc-annotations-1.3.ja
+ r caffeine-2.9.3.jar opentelemetry-exporter-otlp-1.19.0.jar error_prone
+ _annotations-2.14.0.jar annotations-api-6.0.53.jar rocketmq-shaded-slf4
+ j-api-bridge-1.0.0.jar opentelemetry-api-logs-1.19.0-alpha.jar animal-s
+ niffer-annotations-1.21.jar gson-2.9.0.jar concurrentlinkedhashmap-lru-
+ 1.4.2.jar opentelemetry-exporter-logging-1.19.0.jar commons-digester-2.
+ 1.jar bcutil-jdk15on-1.69.jar netty-all-4.1.65.Final.jar listenablefutu
+ re-9999.0-empty-to-avoid-conflict-with-guava.jar opentelemetry-sdk-comm
+ on-1.19.0.jar guava-31.1-jre.jar protobuf-java-3.20.1.jar lz4-java-1.8.
+ 0.jar commons-cli-1.5.0.jar grpc-netty-shaded-1.50.0.jar opentelemetry-
+ context-1.19.0.jar jsr305-3.0.2.jar perfmark-api-0.25.0.jar bcpkix-jdk1
+ 5on-1.69.jar disruptor-1.2.10.jar grpc-stub-1.50.0.jar awaitility-4.1.0
+ .jar jul-to-slf4j-2.0.6.jar rocketmq-slf4j-api-1.0.1.jar slf4j-api-2.0.
+ 3.jar kotlin-stdlib-1.6.20.jar opentelemetry-exporter-prometheus-1.19.0
+ -alpha.jar commons-collections-3.2.2.jar protobuf-java-util-3.20.1.jar 
+ dledger-0.3.1.2.jar okio-jvm-3.0.0.jar kotlin-stdlib-common-1.6.20.jar 
+ javassist-3.20.0-GA.jar opentelemetry-exporter-common-1.19.0.jar common
+ s-beanutils-1.9.4.jar snakeyaml-1.32.jar rocketmq-proto-2.0.2.jar opent
+ elemetry-api-1.19.0.jar grpc-context-1.50.0.jar commons-logging-1.2.jar
+  grpc-api-1.50.0.jar jna-4.2.2.jar commons-lang3-3.12.0.jar
+
