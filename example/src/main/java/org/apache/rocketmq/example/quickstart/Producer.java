@@ -18,6 +18,7 @@ package org.apache.rocketmq.example.quickstart;
 
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.RequestCallback;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
@@ -90,7 +91,17 @@ public class Producer {
                         System.out.println("onException ...");
                     }
                 };
-                producer.send(msg, sendCallback);
+                producer.request(msg, new RequestCallback() {
+                    @Override
+                    public void onSuccess(Message message) {
+                        System.out.println("on success...");
+                    }
+
+                    @Override
+                    public void onException(Throwable e) {
+
+                    }
+                }, 10000);
                 Thread.sleep(10000);
 //                System.out.println(message);
             }
