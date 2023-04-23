@@ -57,7 +57,7 @@ public class Consumer {
          * Specify where to start in case the specific consumer group is a brand-new one.
          */
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
-        if (args.length > 0) {
+        if (args.length == 0) {
             args = new String[] {"TagA"};
         }
         /*
