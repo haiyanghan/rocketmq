@@ -1,0 +1,11 @@
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/PullMessageService.java" description="消费者拉取消息" line="117" />
+    <bookmark url="file://$PROJECT_DIR$/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java" description="Broker处理消息拉取请求" line="299" />
+    <bookmark url="file://$PROJECT_DIR$/store/src/main/java/org/apache/rocketmq/store/DefaultMessageStore.java" description="Store获取消息" line="747" />
+    <bookmark url="file://$PROJECT_DIR$/client/src/main/java/org/apache/rocketmq/client/impl/factory/MQClientInstance.java" description="客户端发送心跳（定时）" line="299" />
+    <bookmark url="file://$PROJECT_DIR$/broker/src/main/java/org/apache/rocketmq/broker/processor/ClientManageProcessor.java" description="Broker处理客户端心跳" line="54" />
+    <bookmark url="file://$PROJECT_DIR$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/RebalanceImpl.java" description="重分配队列" line="236" />
+    <bookmark url="file://$PROJECT_DIR$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/RebalanceImpl.java" description="构建队列PullRequest" line="472" />
+    <bookmark url="file://$PROJECT_DIR$/client/src/main/java/org/apache/rocketmq/client/producer/DefaultMQProducer.java" description="defaultTopicQueueNums" line="95" />
+    <bookmark url="file://$PROJECT_DIR$/broker/src/main/java/org/apache/rocketmq/broker/processor/SendMessageProcessor.java" description="Broker处理消息存储" line="82" />
+  </component>

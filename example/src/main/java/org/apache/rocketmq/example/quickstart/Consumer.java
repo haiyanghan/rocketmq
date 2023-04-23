@@ -57,11 +57,13 @@ public class Consumer {
          * Specify where to start in case the specific consumer group is a brand-new one.
          */
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
-
+        if (args.length > 0) {
+            args = new String[] {"TagA"};
+        }
         /*
          * Subscribe one more topic to consume.
          */
-        consumer.subscribe(TOPIC, MessageSelector.byTag("TagA"));
+        consumer.subscribe(TOPIC, MessageSelector.byTag(args[0]));
 
         /*
          *  Register callback to execute on arrival of messages fetched from brokers.
