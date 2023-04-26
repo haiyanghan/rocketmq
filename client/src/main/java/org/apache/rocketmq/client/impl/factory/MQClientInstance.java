@@ -185,7 +185,9 @@ public class MQClientInstance {
             }
 
             info.setOrderTopic(true);
-        } else if (route.getTopicQueueMappingByBroker() != null && !route.getTopicQueueMappingByBroker().isEmpty()) {
+        } else if (route.getOrderTopicConf() == null
+            && route.getTopicQueueMappingByBroker() != null
+            && !route.getTopicQueueMappingByBroker().isEmpty()) {
             info.setOrderTopic(false);
             ConcurrentMap<MessageQueue, String> mqEndPoints = topicRouteData2EndpointsForStaticTopic(topic, route);
             info.getMessageQueueList().addAll(mqEndPoints.keySet());
