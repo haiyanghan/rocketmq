@@ -763,6 +763,11 @@ public class BrokerController {
                 LOG.error("BrokerController#initialize: unexpected error occurs", e);
             }
         }
+
+        if (this.brokerConfig.isEnableControllerMode()) {
+            this.replicasManager.setIsolatedAndBrokerPermission(false);
+        }
+
         if (messageStore != null) {
             registerMessageStoreHook();
             result = result && this.messageStore.load();
@@ -1552,10 +1557,6 @@ public class BrokerController {
 
         if (messageStoreConfig.getTotalReplicas() > 1 && this.brokerConfig.isEnableSlaveActingMaster()) {
             isIsolated = true;
-        }
-
-        if (this.brokerConfig.isEnableControllerMode()) {
-            this.replicasManager.setIsolatedAndBrokerPermission(false);
         }
 
         if (this.brokerOuterAPI != null) {
