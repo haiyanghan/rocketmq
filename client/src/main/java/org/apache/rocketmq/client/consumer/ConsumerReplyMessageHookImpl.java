@@ -16,25 +16,25 @@
  */
 package org.apache.rocketmq.client.consumer;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.hook.ConsumeMessageContext;
 import org.apache.rocketmq.client.hook.ConsumeMessageHook;
-import org.apache.rocketmq.client.impl.FindBrokerResult;
-import org.apache.rocketmq.client.impl.MQClientAPIImpl;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.client.utils.MessageUtil;
 import org.apache.rocketmq.common.message.MessageDecoder;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.logging.org.slf4j.Logger;
+import org.apache.rocketmq.logging.org.slf4j.LoggerFactory;
 import org.apache.rocketmq.remoting.exception.RemotingConnectException;
 import org.apache.rocketmq.remoting.exception.RemotingSendRequestException;
 import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
+import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.header.ReplyMessageRequestHeader;
 
 import java.util.List;
 
 public class ConsumerReplyMessageHookImpl implements ConsumeMessageHook {
+    private final static Logger log = LoggerFactory.getLogger(ConsumerReplyMessageHookImpl.class);
 
     private String consumerGroup;
     private MQClientInstance mqClientInstance;
@@ -55,16 +55,20 @@ public class ConsumerReplyMessageHookImpl implements ConsumeMessageHook {
     }
 
     @Override
-    public void consumeMessageAfter(ConsumeMessageContext context) throws InterruptedException, RemotingConnectException, RemotingTimeoutException, RemotingSendRequestException, MQBrokerException {
+    public void consumeMessageAfter(ConsumeMessageContext context) {
         List<MessageExt> msgList = context.getMsgList();
         for (MessageExt message : msgList) {
             if (MessageUtil.isReplyMsg(message)) {
-                replyMessageConsumerResultToBroker(context.getStatus(), message);
+                try {
+                    replyMessageConsumerResultToBroker(context.getStatus(), message);
+                } catch (Exception e) {
+                    log.warn("send reply message to broker exception, {}", e);
+                }
             }
         }
     }
 
-    private void replyMessageConsumerResultToBroker(String consumerResult, MessageExt message) throws InterruptedException, MQBrokerException, RemotingTimeoutException, RemotingSendRequestException, RemotingConnectException {
+    private void replyMessageConsumerResultToBroker(String consumerResult, MessageExt message) throws RemotingTooMuchRequestException, InterruptedException, RemotingTimeoutException, RemotingSendRequestException, RemotingConnectException {
         ReplyMessageRequestHeader requestHeader = new ReplyMessageRequestHeader();
         requestHeader.setConsumerGroup(consumerGroup);
         requestHeader.setConsumerResult(consumerResult);

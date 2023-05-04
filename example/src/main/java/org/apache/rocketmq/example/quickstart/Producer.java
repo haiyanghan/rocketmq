@@ -80,12 +80,12 @@ public class Producer {
 
                     @Override
                     public void onSuccess(Message message) {
-                        System.out.println("onSuccess...., ms: " + (System.currentTimeMillis() - l));
+//                        System.out.println("onSuccess...., ms: " + (System.currentTimeMillis() - l));
                     }
 
                     @Override
                     public void onException(Throwable e) {
-                        System.out.println("onException....");
+//                        System.out.println("onException....");
                     }
                 };
                 producer.request(msg, requestCallback, 15000);

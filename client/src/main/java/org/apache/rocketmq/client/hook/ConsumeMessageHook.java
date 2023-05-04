@@ -16,15 +16,10 @@
  */
 package org.apache.rocketmq.client.hook;
 
-import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.remoting.exception.RemotingConnectException;
-import org.apache.rocketmq.remoting.exception.RemotingSendRequestException;
-import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
-
 public interface ConsumeMessageHook {
     String hookName();
 
     void consumeMessageBefore(final ConsumeMessageContext context);
 
-    void consumeMessageAfter(final ConsumeMessageContext context) throws InterruptedException, RemotingConnectException, RemotingTimeoutException, RemotingSendRequestException, MQBrokerException;
+    void consumeMessageAfter(final ConsumeMessageContext context);
 }

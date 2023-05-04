@@ -1438,20 +1438,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         final RequestResponseFuture requestResponseFuture = new RequestResponseFuture(correlationId, timeout, requestCallback);
         RequestFutureHolder.getInstance().getRequestFutureTable().put(correlationId, requestResponseFuture);
 
-        long l = System.currentTimeMillis();
-        SendCallback sendCallback = new SendCallback() {
-
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                System.out.println("send ms: " + (System.currentTimeMillis() - l));
-            }
-
-            @Override
-            public void onException(Throwable e) {
-
-            }
-        };
-        this.sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout);
+        this.sendDefaultImpl(msg, CommunicationMode.SYNC, null, timeout);
     }
 
     public Message request(final Message msg, final MessageQueueSelector selector, final Object arg,

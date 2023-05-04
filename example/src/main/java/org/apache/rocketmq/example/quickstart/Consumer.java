@@ -68,7 +68,7 @@ public class Consumer {
          */
         consumer.registerMessageListener((MessageListenerConcurrently) (msg, context) -> {
             String printMsg = String.format("cur message count: %d, cur thread: %s", msg.size(), Thread.currentThread().getName());
-            System.out.println(printMsg);
+//            System.out.println(printMsg);
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
 
