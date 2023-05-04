@@ -34,7 +34,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.QueryResult;
 import org.apache.rocketmq.client.Validators;
 import org.apache.rocketmq.client.common.ClientErrorCode;
@@ -91,7 +90,6 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
 import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.NamespaceUtil;
-import org.apache.rocketmq.remoting.protocol.ResponseCode;
 import org.apache.rocketmq.remoting.protocol.header.CheckTransactionStateRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.EndTransactionRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.SendMessageRequestHeader;
@@ -1434,22 +1432,26 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
     public void request(Message msg, final RequestCallback requestCallback, long timeout)
         throws RemotingException, InterruptedException, MQClientException, MQBrokerException {
-        long beginTimestamp = System.currentTimeMillis();
         prepareSendRequest(msg, timeout);
 
         final String correlationId = msg.getProperty(MessageConst.PROPERTY_CORRELATION_ID);
         final RequestResponseFuture requestResponseFuture = new RequestResponseFuture(correlationId, timeout, requestCallback);
         RequestFutureHolder.getInstance().getRequestFutureTable().put(correlationId, requestResponseFuture);
 
-        String msgType = msg.getProperty(MessageConst.PROPERTY_MESSAGE_TYPE);
-        if (StringUtils.isBlank(msgType)) {
-            MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_TYPE, MixAll.REPLY_MESSAGE_FLAG);
-        } else if (!msgType.equals(MixAll.REPLY_MESSAGE_FLAG)) {
-            throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "The message type must be is reply, but it is " + msgType);
-        }
+        long l = System.currentTimeMillis();
+        SendCallback sendCallback = new SendCallback() {
 
-        long cost = System.currentTimeMillis() - beginTimestamp;
-        this.sendDefaultImpl(msg, CommunicationMode.SYNC, null, timeout - cost);
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                System.out.println("send ms: " + (System.currentTimeMillis() - l));
+            }
+
+            @Override
+            public void onException(Throwable e) {
+
+            }
+        };
+        this.sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout);
     }
 
     public Message request(final Message msg, final MessageQueueSelector selector, final Object arg,
@@ -1598,17 +1600,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_CORRELATION_ID, correlationId);
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_REPLY_TO_CLIENT, requestClientId);
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_TTL, String.valueOf(timeout));
-
-        boolean hasRouteData = this.getMqClientFactory().getTopicRouteTable().containsKey(msg.getTopic());
-        if (!hasRouteData) {
-            long beginTimestamp = System.currentTimeMillis();
-            this.tryToFindTopicPublishInfo(msg.getTopic());
-            this.getMqClientFactory().sendHeartbeatToAllBrokerWithLock();
-            long cost = System.currentTimeMillis() - beginTimestamp;
-            if (cost > 500) {
-                log.warn("prepare send request for <{}> cost {} ms", msg.getTopic(), cost);
-            }
-        }
+        MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_TYPE, MixAll.REPLY_MESSAGE_FLAG);
     }
 
     public ConcurrentMap<String, TopicPublishInfo> getTopicPublishInfoTable() {

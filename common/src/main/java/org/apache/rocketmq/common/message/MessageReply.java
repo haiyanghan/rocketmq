@@ -14,34 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.common.message;
 
-package org.apache.rocketmq.remoting.protocol.header;
+public class MessageReply extends Message {
 
-import org.apache.rocketmq.remoting.CommandCustomHeader;
-import org.apache.rocketmq.remoting.annotation.CFNotNull;
-import org.apache.rocketmq.remoting.exception.RemotingCommandException;
-
-
-public class ReplyMessageRequestHeader implements CommandCustomHeader {
-    @CFNotNull
     private String consumerGroup;
-    @CFNotNull
     private String consumerResult;
-    @CFNotNull
     private long consumerTimeStamp;
-    @CFNotNull
-    private String topic;
-    @CFNotNull
-    private int flag;
-    @CFNotNull
-    private String properties;
-    @CFNotNull
-    private String transactionId;
-
-    @Override
-    public void checkFields() throws RemotingCommandException {
-
-    }
 
     public String getConsumerGroup() {
         return consumerGroup;
@@ -65,37 +44,5 @@ public class ReplyMessageRequestHeader implements CommandCustomHeader {
 
     public void setConsumerTimeStamp(long consumerTimeStamp) {
         this.consumerTimeStamp = consumerTimeStamp;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public int getFlag() {
-        return flag;
-    }
-
-    public void setFlag(int flag) {
-        this.flag = flag;
-    }
-
-    public String getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String properties) {
-        this.properties = properties;
-    }
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
     }
 }

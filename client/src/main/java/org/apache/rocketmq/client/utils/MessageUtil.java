@@ -17,6 +17,7 @@
 
 package org.apache.rocketmq.client.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.common.ClientErrorCode;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.MixAll;
@@ -51,5 +52,16 @@ public class MessageUtil {
 
     public static String getReplyToClient(final Message msg) {
         return msg.getProperty(MessageConst.PROPERTY_MESSAGE_REPLY_TO_CLIENT);
+    }
+
+    public static boolean isReplyMsg(Message msg) {
+        if (msg == null) {
+            return false;
+        }
+        String msgType = msg.getProperty(MessageConst.PROPERTY_MESSAGE_TYPE);
+        if (StringUtils.isBlank(msgType)) {
+            return false;
+        }
+        return msgType.equals(MixAll.REPLY_MESSAGE_FLAG);
     }
 }

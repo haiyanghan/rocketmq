@@ -60,13 +60,15 @@ public class Consumer {
         /*
          * Subscribe one more topic to consume.
          */
+        consumer.setNamesrvAddr(DEFAULT_NAMESRVADDR);
         consumer.subscribe(TOPIC, "*");
 
         /*
          *  Register callback to execute on arrival of messages fetched from brokers.
          */
         consumer.registerMessageListener((MessageListenerConcurrently) (msg, context) -> {
-            System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msg);
+            String printMsg = String.format("cur message count: %d, cur thread: %s", msg.size(), Thread.currentThread().getName());
+            System.out.println(printMsg);
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
 
