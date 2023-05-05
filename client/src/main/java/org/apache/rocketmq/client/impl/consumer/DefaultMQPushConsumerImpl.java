@@ -959,7 +959,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                         new ConsumeMessagePopConcurrentlyService(this, (MessageListenerConcurrently) this.getMessageListenerInner());
                 }
                 this.registerConsumeMessageHook(new ConsumerReplyMessageHookImpl(this.getDefaultMQPushConsumer().getConsumerGroup(),
-                        this.mQClientFactory));
+                        this.mQClientFactory, this.getDefaultMQPushConsumer().getSendReplyMessageThreadNums()));
                 this.consumeMessageService.start();
                 // POPTODO
                 this.consumeMessagePopService.start();

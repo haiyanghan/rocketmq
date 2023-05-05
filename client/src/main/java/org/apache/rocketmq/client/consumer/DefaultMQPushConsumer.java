@@ -287,6 +287,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
     // force to use client rebalance
     private boolean clientRebalance = true;
 
+    private int sendReplyMessageThreadNums = 4;
+
     /**
      * Default constructor.
      */
@@ -971,5 +973,13 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
 
     public void setClientRebalance(boolean clientRebalance) {
         this.clientRebalance = clientRebalance;
+    }
+
+    public int getSendReplyMessageThreadNums() {
+        return sendReplyMessageThreadNums;
+    }
+
+    public void setSendReplyMessageThreadNums(int sendReplyMessageThreadNums) {
+        this.sendReplyMessageThreadNums = sendReplyMessageThreadNums;
     }
 }

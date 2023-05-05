@@ -21,6 +21,7 @@ import org.apache.rocketmq.client.hook.ConsumeMessageContext;
 import org.apache.rocketmq.client.hook.ConsumeMessageHook;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.client.utils.MessageUtil;
+import org.apache.rocketmq.common.ThreadFactoryImpl;
 import org.apache.rocketmq.common.message.MessageDecoder;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.logging.org.slf4j.Logger;
@@ -32,16 +33,30 @@ import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.header.ReplyMessageRequestHeader;
 
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class ConsumerReplyMessageHookImpl implements ConsumeMessageHook {
     private final static Logger log = LoggerFactory.getLogger(ConsumerReplyMessageHookImpl.class);
 
-    private String consumerGroup;
-    private MQClientInstance mqClientInstance;
+    private final String consumerGroup;
+    private final MQClientInstance mqClientInstance;
 
-    public ConsumerReplyMessageHookImpl(String consumerGroup, MQClientInstance mqClientInstance) {
+    private final ThreadPoolExecutor sendReplyExecutor;
+
+
+    public ConsumerReplyMessageHookImpl(String consumerGroup, MQClientInstance mqClientInstance, int sendReplyMessageThreadNums) {
         this.consumerGroup = consumerGroup;
         this.mqClientInstance = mqClientInstance;
+        this.sendReplyExecutor = new ThreadPoolExecutor(
+                sendReplyMessageThreadNums,
+                sendReplyMessageThreadNums,
+                0,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadFactoryImpl("SendReplyMessageThread_"),
+                new ThreadPoolExecutor.DiscardOldestPolicy());
     }
 
     @Override
@@ -59,11 +74,13 @@ public class ConsumerReplyMessageHookImpl implements ConsumeMessageHook {
         List<MessageExt> msgList = context.getMsgList();
         for (MessageExt message : msgList) {
             if (MessageUtil.isReplyMsg(message)) {
-                try {
-                    replyMessageConsumerResultToBroker(context.getStatus(), message);
-                } catch (Exception e) {
-                    log.warn("send reply message to broker exception, {}", e);
-                }
+                this.sendReplyExecutor.submit(() -> {
+                    try {
+                        replyMessageConsumerResultToBroker(context.getStatus(), message);
+                    } catch (Exception e) {
+                        log.warn("send reply message to broker exception, {}", e);
+                    }
+                });
             }
         }
     }
