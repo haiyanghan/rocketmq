@@ -36,11 +36,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.Validators;
-import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
-import org.apache.rocketmq.client.consumer.MessageQueueListener;
-import org.apache.rocketmq.client.consumer.MessageSelector;
-import org.apache.rocketmq.client.consumer.PullResult;
-import org.apache.rocketmq.client.consumer.TopicMessageQueueChangeListener;
+import org.apache.rocketmq.client.consumer.*;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.store.LocalFileOffsetStore;
 import org.apache.rocketmq.client.consumer.store.OffsetStore;
@@ -301,6 +297,8 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
 
                 initOffsetStore();
 
+                registerMqClientConsumeMessageHook();
+
                 mQClientFactory.start();
 
                 startScheduleTask();
@@ -322,6 +320,11 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
             default:
                 break;
         }
+    }
+
+    private void registerMqClientConsumeMessageHook() {
+        this.registerConsumeMessageHook(new ConsumerReplyMessageHookImpl(this.getDefaultLitePullConsumer().getConsumerGroup(),
+                this.mQClientFactory, this.getDefaultLitePullConsumer().getSendReplyMessageThreadNums()));
     }
 
     private void initMQClientFactory() throws MQClientException {

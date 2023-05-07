@@ -1598,6 +1598,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             if (cost > 500) {
                 log.warn("prepare send request for <{}> cost {} ms", msg.getTopic(), cost);
             }
+            System.out.println("prepareSendRequest: " + cost + "ms");
         }
     }
 
