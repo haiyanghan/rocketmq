@@ -414,7 +414,8 @@ public class DefaultMQProducerTest {
                     responseMsg.setBody(message.getBody());
                     for (Map.Entry<String, RequestResponseFuture> entry : responseMap.entrySet()) {
                         RequestResponseFuture future = entry.getValue();
-                        future.putResponseMessage(responseMsg);
+                        future.setSendRequestOk(true);
+                        future.onSuccess(responseMsg);
                     }
                 }
             }
@@ -461,7 +462,7 @@ public class DefaultMQProducerTest {
         for (Map.Entry<String, RequestResponseFuture> entry : responseMap.entrySet()) {
             RequestResponseFuture future = entry.getValue();
             future.setSendRequestOk(true);
-            future.getRequestCallback().onSuccess(responseMsg);
+            future.onSuccess(responseMsg);
         }
         countDownLatch.await(3000L, TimeUnit.MILLISECONDS);
     }
@@ -497,7 +498,7 @@ public class DefaultMQProducerTest {
             assertThat(responseMap).isNotNull();
             for (Map.Entry<String, RequestResponseFuture> entry : responseMap.entrySet()) {
                 RequestResponseFuture future = entry.getValue();
-                future.getRequestCallback().onException(e);
+                future.onException(e);
             }
         }
         countDownLatch.await(3000L, TimeUnit.MILLISECONDS);

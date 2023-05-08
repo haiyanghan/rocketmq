@@ -262,17 +262,7 @@ public class ClientRemotingProcessor implements NettyRequestProcessor {
                 // wait time out remove
                 return;
             }
-            if (requestResponseFuture.isSupportMultiCallback()) {
-                RequestCallback requestCallback = requestResponseFuture.getRequestCallback();
-                requestCallback.onSuccess(replyMsg);
-            } else {
-                try {
-                    requestResponseFuture.putResponseMessage(replyMsg);
-                    requestResponseFuture.executeRequestCallback();
-                } finally {
-                    RequestFutureHolder.getInstance().getRequestFutureTable().remove(correlationId);
-                }
-            }
+            requestResponseFuture.onSuccess(replyMsg);
         } else {
             logger.warn(String.format("receive reply message, but not matched any request, CorrelationId: %s",
                 correlationId));

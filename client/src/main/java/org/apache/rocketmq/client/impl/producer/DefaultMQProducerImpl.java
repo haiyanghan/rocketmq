@@ -1417,9 +1417,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
                 @Override
                 public void onException(Throwable e) {
-                    requestResponseFuture.setSendRequestOk(false);
-                    requestResponseFuture.setCause(e);
-                    requestResponseFuture.executeRequestCallback();
+                    requestResponseFuture.onException(e);
                 }
             };
             this.sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout - cost);
@@ -1448,12 +1446,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
             @Override
             public void onException(Throwable e) {
-                requestResponseFuture.setSendRequestOk(false);
-                requestResponseFuture.setCause(e);
-                requestResponseFuture.executeRequestCallback();
+                requestResponseFuture.onException(e);
             }
         };
-
         this.sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout - cost);
     }
 
@@ -1477,9 +1472,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
                 @Override
                 public void onException(Throwable e) {
-                    requestResponseFuture.setSendRequestOk(false);
-                    requestResponseFuture.setCause(e);
-                    requestResponseFuture.executeRequestCallback();
+                    requestResponseFuture.onException(e);
                 }
             };
             this.sendSelectImpl(msg, selector, arg, CommunicationMode.ASYNC, sendCallback, timeout - cost);
@@ -1508,9 +1501,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
             @Override
             public void onException(Throwable e) {
-                requestResponseFuture.setSendRequestOk(false);
-                requestResponseFuture.setCause(e);
-                requestResponseFuture.executeRequestCallback();
+                requestResponseFuture.onException(e);
             }
         };
         this.sendSelectImpl(msg, selector, arg, CommunicationMode.ASYNC, sendCallback, timeout - cost);
@@ -1536,9 +1527,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
                 @Override
                 public void onException(Throwable e) {
-                    requestResponseFuture.setSendRequestOk(false);
-                    requestResponseFuture.setCause(e);
-                    requestResponseFuture.executeRequestCallback();
+                    requestResponseFuture.onException(e);
                 }
             };
             this.sendKernelImpl(msg, mq, CommunicationMode.ASYNC, sendCallback, null, timeout - cost);
@@ -1581,9 +1570,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
             @Override
             public void onException(Throwable e) {
-                requestResponseFuture.setSendRequestOk(false);
-                requestResponseFuture.setCause(e);
-                requestResponseFuture.executeRequestCallback();
+                requestResponseFuture.onException(e);
             }
         };
         this.sendKernelImpl(msg, mq, CommunicationMode.ASYNC, sendCallback, null, timeout - cost);
