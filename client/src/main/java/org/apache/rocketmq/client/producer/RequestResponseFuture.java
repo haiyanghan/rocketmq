@@ -25,7 +25,6 @@ public class RequestResponseFuture {
     private final String correlationId;
     private final RequestCallback requestCallback;
     private final long beginTimestamp = System.currentTimeMillis();
-    private final Message requestMsg = null;
     private long timeoutMillis;
     private CountDownLatch countDownLatch = new CountDownLatch(1);
     private volatile Message responseMsg = null;
@@ -67,36 +66,8 @@ public class RequestResponseFuture {
         return correlationId;
     }
 
-    public long getTimeoutMillis() {
-        return timeoutMillis;
-    }
-
-    public void setTimeoutMillis(long timeoutMillis) {
-        this.timeoutMillis = timeoutMillis;
-    }
-
     public RequestCallback getRequestCallback() {
         return requestCallback;
-    }
-
-    public long getBeginTimestamp() {
-        return beginTimestamp;
-    }
-
-    public CountDownLatch getCountDownLatch() {
-        return countDownLatch;
-    }
-
-    public void setCountDownLatch(CountDownLatch countDownLatch) {
-        this.countDownLatch = countDownLatch;
-    }
-
-    public Message getResponseMsg() {
-        return responseMsg;
-    }
-
-    public void setResponseMsg(Message responseMsg) {
-        this.responseMsg = responseMsg;
     }
 
     public boolean isSendRequestOk() {
@@ -107,15 +78,15 @@ public class RequestResponseFuture {
         this.sendRequestOk = sendRequestOk;
     }
 
-    public Message getRequestMsg() {
-        return requestMsg;
+    public void setCause(Throwable cause) {
+        this.cause = cause;
     }
 
     public Throwable getCause() {
         return cause;
     }
 
-    public void setCause(Throwable cause) {
-        this.cause = cause;
+    public boolean isSupportMultiCallback() {
+        return requestCallback != null && requestCallback.allowMultipleCallback();
     }
 }

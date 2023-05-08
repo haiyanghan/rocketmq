@@ -23,4 +23,8 @@ public interface RequestCallback {
     void onSuccess(final Message message);
 
     void onException(final Throwable e);
+
+    default boolean allowMultipleCallback() {
+        return false;
+    }
 }

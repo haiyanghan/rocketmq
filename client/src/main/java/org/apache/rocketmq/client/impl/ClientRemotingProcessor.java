@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.client.impl.producer.MQProducerInner;
+import org.apache.rocketmq.client.producer.RequestCallback;
 import org.apache.rocketmq.client.producer.RequestFutureHolder;
 import org.apache.rocketmq.client.producer.RequestResponseFuture;
 import org.apache.rocketmq.common.UtilAll;
@@ -254,10 +255,24 @@ public class ClientRemotingProcessor implements NettyRequestProcessor {
 
     private void processReplyMessage(MessageReply replyMsg) {
         final String correlationId = replyMsg.getUserProperty(MessageConst.PROPERTY_CORRELATION_ID);
-        final RequestResponseFuture requestResponseFuture = RequestFutureHolder.getInstance().getRequestFutureTable().remove(correlationId);
+        final RequestResponseFuture requestResponseFuture = RequestFutureHolder.getInstance().getRequestFutureTable().get(correlationId);
+
         if (requestResponseFuture != null) {
-            requestResponseFuture.putResponseMessage(replyMsg);
-            requestResponseFuture.executeRequestCallback();
+            if (requestResponseFuture.isTimeout()) {
+                // wait time out remove
+                return;
+            }
+            if (requestResponseFuture.isSupportMultiCallback()) {
+                RequestCallback requestCallback = requestResponseFuture.getRequestCallback();
+                requestCallback.onSuccess(replyMsg);
+            } else {
+                try {
+                    requestResponseFuture.putResponseMessage(replyMsg);
+                    requestResponseFuture.executeRequestCallback();
+                } finally {
+                    RequestFutureHolder.getInstance().getRequestFutureTable().remove(correlationId);
+                }
+            }
         } else {
             logger.warn(String.format("receive reply message, but not matched any request, CorrelationId: %s",
                 correlationId));
