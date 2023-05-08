@@ -22,6 +22,7 @@ import org.apache.rocketmq.client.hook.ConsumeMessageHook;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.client.utils.MessageUtil;
 import org.apache.rocketmq.common.ThreadFactoryImpl;
+import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.common.message.MessageDecoder;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.logging.org.slf4j.Logger;
@@ -86,6 +87,17 @@ public class ConsumerReplyMessageHookImpl implements ConsumeMessageHook {
     }
 
     private void replyMessageConsumerResultToBroker(String consumerResult, MessageExt message) throws RemotingTooMuchRequestException, InterruptedException, RemotingTimeoutException, RemotingSendRequestException, RemotingConnectException {
+        String ttl = message.getProperty(MessageConst.PROPERTY_MESSAGE_REPLY_TTL);
+        String sendTime = message.getProperty(MessageConst.PROPERTY_MESSAGE_REPLY_SEND_TIME);
+
+        if (StringUtils.isNotBlank(ttl) && StringUtils.isNotBlank(sendTime)) {
+            long replyTimeout = Long.parseLong(sendTime) + Long.parseLong(ttl);
+            if (System.currentTimeMillis() > replyTimeout) {
+                log.warn("reply message timeout: " + replyTimeout + ", can not reply message");
+                return;
+            }
+        }
+
         ReplyMessageRequestHeader requestHeader = new ReplyMessageRequestHeader();
         requestHeader.setConsumerGroup(consumerGroup);
         requestHeader.setConsumerResult(consumerResult);

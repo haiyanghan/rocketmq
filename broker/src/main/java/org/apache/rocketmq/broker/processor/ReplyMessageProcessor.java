@@ -19,7 +19,9 @@ package org.apache.rocketmq.broker.processor;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.broker.BrokerController;
 import org.apache.rocketmq.common.constant.LoggerName;
@@ -50,10 +52,6 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor {
         if (requestHeader == null) {
             return null;
         }
-        final long startTimestamp = this.brokerController.getBrokerConfig().getStartAcceptSendRequestTimeStamp();
-        if (this.brokerController.getMessageStore().now() < startTimestamp) {
-            return null;
-        }
         boolean result = this.pushReplyMessageToProducer(request, requestHeader);
         log.debug("send ReplyMessage result, {}", result);
         return null;
@@ -66,9 +64,19 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor {
 
         String correlationId = properties.get(MessageConst.PROPERTY_CORRELATION_ID);
         String producer = properties.get(MessageConst.PROPERTY_MESSAGE_REPLY_TO_CLIENT);
+        String ttl = properties.get(MessageConst.PROPERTY_MESSAGE_REPLY_TTL);
+        String sendTime = properties.get(MessageConst.PROPERTY_MESSAGE_REPLY_SEND_TIME);
         if (StringUtils.isBlank(correlationId)) {
             log.warn("'" + MessageConst.PROPERTY_CORRELATION_ID + "' property is null, can not reply message");
             return false;
+        }
+
+        if (StringUtils.isNotBlank(ttl) && StringUtils.isNotBlank(sendTime)) {
+            long replyTimeout = Long.parseLong(sendTime) + Long.parseLong(ttl);
+            if (System.currentTimeMillis() > replyTimeout) {
+                log.warn("reply message timeout: " + replyTimeout + ", can not reply message");
+                return false;
+            }
         }
 
         if (StringUtils.isBlank(producer)) {

@@ -32,7 +32,7 @@ public class MessageUtil {
             String cluster = requestMessage.getProperty(MessageConst.PROPERTY_CLUSTER);
             String replyTo = requestMessage.getProperty(MessageConst.PROPERTY_MESSAGE_REPLY_TO_CLIENT);
             String correlationId = requestMessage.getProperty(MessageConst.PROPERTY_CORRELATION_ID);
-            String ttl = requestMessage.getProperty(MessageConst.PROPERTY_MESSAGE_TTL);
+            String ttl = requestMessage.getProperty(MessageConst.PROPERTY_MESSAGE_REPLY_TTL);
             replyMessage.setBody(body);
             if (cluster != null) {
                 String replyTopic = MixAll.getReplyTopic(cluster);
@@ -40,7 +40,7 @@ public class MessageUtil {
                 MessageAccessor.putProperty(replyMessage, MessageConst.PROPERTY_MESSAGE_TYPE, MixAll.REPLY_MESSAGE_FLAG);
                 MessageAccessor.putProperty(replyMessage, MessageConst.PROPERTY_CORRELATION_ID, correlationId);
                 MessageAccessor.putProperty(replyMessage, MessageConst.PROPERTY_MESSAGE_REPLY_TO_CLIENT, replyTo);
-                MessageAccessor.putProperty(replyMessage, MessageConst.PROPERTY_MESSAGE_TTL, ttl);
+                MessageAccessor.putProperty(replyMessage, MessageConst.PROPERTY_MESSAGE_REPLY_TTL, ttl);
 
                 return replyMessage;
             } else {

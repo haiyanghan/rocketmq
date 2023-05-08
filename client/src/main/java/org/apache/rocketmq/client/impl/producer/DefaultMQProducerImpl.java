@@ -1586,7 +1586,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         String requestClientId = this.getMqClientFactory().getClientId();
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_CORRELATION_ID, correlationId);
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_REPLY_TO_CLIENT, requestClientId);
-        MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_TTL, String.valueOf(timeout));
+        MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_REPLY_SEND_TIME, String.valueOf(beginTimestamp));
+        MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_REPLY_TTL, String.valueOf(timeout));
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_MESSAGE_TYPE, MixAll.REPLY_MESSAGE_FLAG);
 
         // Early registration producer channel in ProducerManager
@@ -1598,7 +1599,6 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             if (cost > 500) {
                 log.warn("prepare send request for <{}> cost {} ms", msg.getTopic(), cost);
             }
-            System.out.println("prepareSendRequest: " + cost + "ms");
         }
     }
 
