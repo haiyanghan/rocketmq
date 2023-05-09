@@ -48,7 +48,6 @@ public class RequestResponseFuture {
             }
             this.responseMsg = msg;
             this.countDownLatch.countDown();
-            System.out.println("countDown..");
             if (this.requestCallback != null) {
                 try {
                     this.requestCallback.onSuccess(msg);

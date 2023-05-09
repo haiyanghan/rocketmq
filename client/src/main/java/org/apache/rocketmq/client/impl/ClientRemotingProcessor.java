@@ -23,7 +23,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.client.impl.producer.MQProducerInner;
-import org.apache.rocketmq.client.producer.RequestCallback;
 import org.apache.rocketmq.client.producer.RequestFutureHolder;
 import org.apache.rocketmq.client.producer.RequestResponseFuture;
 import org.apache.rocketmq.common.UtilAll;

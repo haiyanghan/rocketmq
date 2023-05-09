@@ -57,7 +57,7 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor {
         return null;
     }
 
-    private boolean pushReplyMessageToProducer(RemotingCommand remotingCommand,
+    public boolean pushReplyMessageToProducer(RemotingCommand remotingCommand,
                                                final ReplyMessageRequestHeader requestHeader) {
 
         Map<String, String> properties = MessageDecoder.string2messageProperties(requestHeader.getProperties());

@@ -29,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.rocketmq.client.ClientConfig;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -427,10 +429,26 @@ public class DefaultMQProducerTest {
         assertThat(result.getBody()).isEqualTo(new byte[] {'a'});
     }
 
-    @Test(expected = RequestTimeoutException.class)
+    @Test
     public void testRequestMessage_RequestTimeoutException() throws RemotingException, RequestTimeoutException, MQClientException, InterruptedException, MQBrokerException {
+        AtomicReference<Throwable> reference = new AtomicReference<>(null);
         when(mQClientAPIImpl.getTopicRouteInfoFromNameServer(anyString(), anyLong())).thenReturn(createTopicRoute());
-        Message result = producer.request(message, 3 * 1000L);
+        producer.request(message, new RequestCallback() {
+            @Override
+            public void onSuccess(Message message) {
+
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                reference.set(e);
+            }
+        }, 3 * 1000L);
+
+        while (reference.get() == null) {
+            TimeUnit.SECONDS.sleep(1);
+        }
+        assertThat(reference.get()).isExactlyInstanceOf(RequestTimeoutException.class);
     }
 
     @Test
