@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.util.cache;
 
-import java.util.Map;
+package org.apache.rocketmq.common.utils;
 
-public interface CacheEvictHandler<K, V> {
-    void onEvict(Map.Entry<K, V> eldest);
+public interface Shutdown {
+    void shutdown() throws Exception;
 }

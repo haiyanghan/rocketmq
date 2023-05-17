@@ -14,23 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.util.cache;
 
+package org.apache.rocketmq.client.common;
 
-public class CacheObject<T> {
-    private T target;
-    private long bornTime = System.currentTimeMillis();
-    private long exp;
+public class NameserverAccessConfig {
+    private String namesrvAddr;
+    private String namesrvDomain;
+    private String namesrvDomainSubgroup;
 
-    public CacheObject(long exp, T target) {
-        this.exp = exp;
-        this.target = target;
+    public NameserverAccessConfig(String namesrvAddr, String namesrvDomain, String namesrvDomainSubgroup) {
+        this.namesrvAddr = namesrvAddr;
+        this.namesrvDomain = namesrvDomain;
+        this.namesrvDomainSubgroup = namesrvDomainSubgroup;
     }
 
-    public T getTarget() {
-        if (System.currentTimeMillis() - bornTime > exp) {
-            return null;
-        }
-        return target;
+    public String getNamesrvAddr() {
+        return namesrvAddr;
+    }
+
+    public String getNamesrvDomain() {
+        return namesrvDomain;
+    }
+
+    public String getNamesrvDomainSubgroup() {
+        return namesrvDomainSubgroup;
     }
 }

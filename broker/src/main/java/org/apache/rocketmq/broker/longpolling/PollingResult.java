@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.rocketmq.proxy.common;
+package org.apache.rocketmq.broker.longpolling;
 
-public interface Start {
-    void start() throws Exception;
+public enum PollingResult {
+    POLLING_SUC,
+    POLLING_FULL,
+    POLLING_TIMEOUT,
+    NOT_POLLING;
 }
