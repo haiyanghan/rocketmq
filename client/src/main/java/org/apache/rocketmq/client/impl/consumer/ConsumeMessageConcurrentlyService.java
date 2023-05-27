@@ -463,6 +463,5 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         public MessageQueue getMessageQueue() {
             return messageQueue;
         }
-
     }
 }
