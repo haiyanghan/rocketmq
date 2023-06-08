@@ -47,21 +47,29 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-public class TieredMessageFetcherTest {
-    private TieredMessageStoreConfig storeConfig;
+@Ignore
+public abstract class TieredMessageFetcherBaseTest {
+    protected TieredMessageStoreConfig storeConfig;
     private MessageQueue mq;
 
     private final String storePath = FileUtils.getTempDirectory() + File.separator + "tiered_store_unit_test" + UUID.randomUUID();
 
+    public abstract void setTieredBackendProvider();
+
     @Before
     public void setUp() {
         storeConfig = new TieredMessageStoreConfig();
+        setTieredBackendProvider();
         storeConfig.setStorePathRootDir(storePath);
         storeConfig.setBrokerName(storeConfig.getBrokerName());
         storeConfig.setReadAheadCacheExpireDuration(Long.MAX_VALUE);
-        storeConfig.setTieredBackendServiceProvider("org.apache.rocketmq.tieredstore.mock.MemoryFileSegmentWithoutCheck");
+        storeConfig.setObjectStoreRegion("ap-northeast-1");
+        storeConfig.setObjectStoreBucket("rocketmq-lcy");
+        storeConfig.setBrokerName(storeConfig.getBrokerName());
+        storeConfig.setBrokerClusterName("test-cluster");
         storeConfig.setTieredStoreIndexFileMaxHashSlotNum(2);
         storeConfig.setTieredStoreIndexFileMaxIndexNum(3);
         mq = new MessageQueue("TieredMessageFetcherTest", storeConfig.getBrokerName(), 0);
@@ -89,13 +97,13 @@ public class TieredMessageFetcherTest {
         getMessageResult = fetcher.getMessageAsync("group", mq.getTopic(), mq.getQueueId(), 0, 32, null).join();
         Assert.assertEquals(GetMessageStatus.NO_MESSAGE_IN_QUEUE, getMessageResult.getStatus());
 
-        ByteBuffer msg1 = MessageBufferUtilTest.buildMessageBuffer();
+        ByteBuffer msg1 = MessageBufferUtilTest.buildMockedMessageBuffer();
         msg1.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 0);
         msg1.putLong(MessageBufferUtil.PHYSICAL_OFFSET_POSITION, 0);
         AppendResult result = container.appendCommitLog(msg1);
         Assert.assertEquals(AppendResult.SUCCESS, result);
 
-        ByteBuffer msg2 = MessageBufferUtilTest.buildMessageBuffer();
+        ByteBuffer msg2 = MessageBufferUtilTest.buildMockedMessageBuffer();
         msg2.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 1);
         msg2.putLong(MessageBufferUtil.PHYSICAL_OFFSET_POSITION, MessageBufferUtilTest.MSG_LEN);
         container.appendCommitLog(msg2);
@@ -199,7 +207,7 @@ public class TieredMessageFetcherTest {
         TieredMessageQueueContainer container = TieredContainerManager.getInstance(storeConfig).getOrCreateMQContainer(mq);
         container.initOffset(0);
 
-        ByteBuffer msg1 = MessageBufferUtilTest.buildMessageBuffer();
+        ByteBuffer msg1 = MessageBufferUtilTest.buildMockedMessageBuffer();
         msg1.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 0);
         msg1.putLong(MessageBufferUtil.PHYSICAL_OFFSET_POSITION, 0);
         long currentTimeMillis1 = System.currentTimeMillis();
@@ -207,7 +215,7 @@ public class TieredMessageFetcherTest {
         AppendResult result = container.appendCommitLog(msg1);
         Assert.assertEquals(AppendResult.SUCCESS, result);
 
-        ByteBuffer msg2 = MessageBufferUtilTest.buildMessageBuffer();
+        ByteBuffer msg2 = MessageBufferUtilTest.buildMockedMessageBuffer();
         msg2.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 1);
         msg2.putLong(MessageBufferUtil.PHYSICAL_OFFSET_POSITION, MessageBufferUtilTest.MSG_LEN);
         long currentTimeMillis2 = System.currentTimeMillis();
@@ -244,7 +252,7 @@ public class TieredMessageFetcherTest {
 
 
         long timestamp = System.currentTimeMillis();
-        ByteBuffer buffer = MessageBufferUtilTest.buildMessageBuffer();
+        ByteBuffer buffer = MessageBufferUtilTest.buildMockedMessageBuffer();
         buffer.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 50);
         buffer.putLong(MessageBufferUtil.STORE_TIMESTAMP_POSITION, timestamp);
         container.initOffset(50);
@@ -266,13 +274,13 @@ public class TieredMessageFetcherTest {
         Assert.assertEquals(0, fetcher.queryMessageAsync(mq.getTopic(), "key", 32, 0, Long.MAX_VALUE).join().getMessageMapedList().size());
 
         container.initOffset(0);
-        ByteBuffer buffer = MessageBufferUtilTest.buildMessageBuffer();
+        ByteBuffer buffer = MessageBufferUtilTest.buildMockedMessageBuffer();
         buffer.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 0);
         container.appendCommitLog(buffer);
-        buffer = MessageBufferUtilTest.buildMessageBuffer();
+        buffer = MessageBufferUtilTest.buildMockedMessageBuffer();
         buffer.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 1);
         container.appendCommitLog(buffer);
-        buffer = MessageBufferUtilTest.buildMessageBuffer();
+        buffer = MessageBufferUtilTest.buildMockedMessageBuffer();
         buffer.putLong(MessageBufferUtil.QUEUE_OFFSET_POSITION, 2);
         container.appendCommitLog(buffer);
 
