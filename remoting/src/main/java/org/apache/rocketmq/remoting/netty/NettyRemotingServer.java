@@ -18,6 +18,7 @@ package org.apache.rocketmq.remoting.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -58,7 +59,9 @@ import org.apache.rocketmq.common.Pair;
 import org.apache.rocketmq.common.ThreadFactoryImpl;
 import org.apache.rocketmq.common.constant.HAProxyConstants;
 import org.apache.rocketmq.common.constant.LoggerName;
+import org.apache.rocketmq.common.utils.BinaryUtil;
 import org.apache.rocketmq.common.utils.NetworkUtil;
+import org.apache.rocketmq.common.utils.ThreadUtils;
 import org.apache.rocketmq.logging.org.slf4j.Logger;
 import org.apache.rocketmq.logging.org.slf4j.LoggerFactory;
 import org.apache.rocketmq.remoting.ChannelEventListener;
@@ -81,7 +84,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -169,7 +171,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     }
 
     private ScheduledExecutorService buildScheduleExecutor() {
-        return new ScheduledThreadPoolExecutor(1,
+        return ThreadUtils.newScheduledThreadPool(1,
             new ThreadFactoryImpl("NettyServerScheduler_", true),
             new ThreadPoolExecutor.DiscardOldestPolicy());
     }
@@ -502,7 +504,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                     case DISABLED:
                         ctx.close();
                         log.warn("Clients intend to establish an SSL connection while this server is running in SSL disabled mode");
-                        break;
+                        throw new UnsupportedOperationException("The NettyRemotingServer in SSL disabled mode doesn't support ssl client");
                     case PERMISSIVE:
                     case ENFORCING:
                         if (null != sslContext) {
@@ -758,7 +760,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             if (msg instanceof HAProxyMessage) {
-                fillChannelWithMessage((HAProxyMessage) msg, ctx.channel());
+                handleWithMessage((HAProxyMessage) msg, ctx.channel());
             } else {
                 super.channelRead(ctx, msg);
             }
@@ -771,26 +773,34 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
          * @param msg
          * @param channel
          */
-        private void fillChannelWithMessage(HAProxyMessage msg, Channel channel) {
-            if (StringUtils.isNotBlank(msg.sourceAddress())) {
-                channel.attr(AttributeKeys.PROXY_PROTOCOL_ADDR).set(msg.sourceAddress());
-            }
-            if (msg.sourcePort() > 0) {
-                channel.attr(AttributeKeys.PROXY_PROTOCOL_PORT).set(String.valueOf(msg.sourcePort()));
-            }
-            if (StringUtils.isNotBlank(msg.destinationAddress())) {
-                channel.attr(AttributeKeys.PROXY_PROTOCOL_SERVER_ADDR).set(msg.destinationAddress());
-            }
-            if (msg.destinationPort() > 0) {
-                channel.attr(AttributeKeys.PROXY_PROTOCOL_SERVER_PORT).set(String.valueOf(msg.destinationPort()));
-            }
-            if (CollectionUtils.isNotEmpty(msg.tlvs())) {
-                msg.tlvs().forEach(tlv -> {
-                    AttributeKey<String> key = AttributeKeys.valueOf(
-                            HAProxyConstants.PROXY_PROTOCOL_TLV_PREFIX + String.format("%02x", tlv.typeByteValue()));
-                    String value = StringUtils.trim(tlv.content().toString(CharsetUtil.UTF_8));
-                    channel.attr(key).set(value);
-                });
+        private void handleWithMessage(HAProxyMessage msg, Channel channel) {
+            try {
+                if (StringUtils.isNotBlank(msg.sourceAddress())) {
+                    channel.attr(AttributeKeys.PROXY_PROTOCOL_ADDR).set(msg.sourceAddress());
+                }
+                if (msg.sourcePort() > 0) {
+                    channel.attr(AttributeKeys.PROXY_PROTOCOL_PORT).set(String.valueOf(msg.sourcePort()));
+                }
+                if (StringUtils.isNotBlank(msg.destinationAddress())) {
+                    channel.attr(AttributeKeys.PROXY_PROTOCOL_SERVER_ADDR).set(msg.destinationAddress());
+                }
+                if (msg.destinationPort() > 0) {
+                    channel.attr(AttributeKeys.PROXY_PROTOCOL_SERVER_PORT).set(String.valueOf(msg.destinationPort()));
+                }
+                if (CollectionUtils.isNotEmpty(msg.tlvs())) {
+                    msg.tlvs().forEach(tlv -> {
+                        byte[] valueBytes = ByteBufUtil.getBytes(tlv.content());
+                        if (!BinaryUtil.isAscii(valueBytes)) {
+                            return;
+                        }
+                        AttributeKey<String> key = AttributeKeys.valueOf(
+                                HAProxyConstants.PROXY_PROTOCOL_TLV_PREFIX + String.format("%02x", tlv.typeByteValue()));
+                        String value = StringUtils.trim(new String(valueBytes, CharsetUtil.UTF_8));
+                        channel.attr(key).set(value);
+                    });
+                }
+            } finally {
+                msg.release();
             }
         }
     }
