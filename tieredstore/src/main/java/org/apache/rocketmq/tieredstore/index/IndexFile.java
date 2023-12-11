@@ -14,24 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.tieredstore.index;
 
-package org.apache.rocketmq.client.impl;
+import java.nio.ByteBuffer;
 
-import org.apache.rocketmq.remoting.InvokeCallback;
-import org.apache.rocketmq.remoting.netty.ResponseFuture;
+public interface IndexFile extends IndexService {
 
-public abstract class BaseInvokeCallback implements InvokeCallback {
-    private final MQClientAPIImpl mqClientAPI;
-
-    public BaseInvokeCallback(MQClientAPIImpl mqClientAPI) {
-        this.mqClientAPI = mqClientAPI;
+    /**
+     * Enumeration for the status of the index file.
+     */
+    enum IndexStatusEnum {
+        SHUTDOWN, UNSEALED, SEALED, UPLOAD
     }
 
-    @Override
-    public void operationComplete(final ResponseFuture responseFuture) {
-        mqClientAPI.execRpcHooksAfterRequest(responseFuture);
-        onComplete(responseFuture);
-    }
+    long getTimestamp();
 
-    public abstract void onComplete(final ResponseFuture responseFuture);
+    IndexStatusEnum getFileStatus();
+
+    ByteBuffer doCompaction();
 }

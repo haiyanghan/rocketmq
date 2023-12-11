@@ -14,29 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.tieredstore.common;
 
-package org.apache.rocketmq.remoting.protocol.header;
+import java.nio.ByteBuffer;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.List;
-import org.apache.rocketmq.common.PlainAccessConfig;
-import org.apache.rocketmq.remoting.CommandCustomHeader;
-import org.apache.rocketmq.remoting.annotation.CFNotNull;
-import org.apache.rocketmq.remoting.exception.RemotingCommandException;
+public class SelectBufferResultTest {
+    @Test
+    public void testSelectBufferResult() {
+        ByteBuffer buffer = ByteBuffer.allocate(10);
+        long startOffset = 5L;
+        int size = 10;
+        long tagCode = 1L;
 
-public class GetBrokerClusterAclConfigResponseHeader implements CommandCustomHeader {
-
-    @CFNotNull
-    private List<PlainAccessConfig> plainAccessConfigs;
-
-    @Override
-    public void checkFields() throws RemotingCommandException {
-    }
-
-    public List<PlainAccessConfig> getPlainAccessConfigs() {
-        return plainAccessConfigs;
-    }
-
-    public void setPlainAccessConfigs(List<PlainAccessConfig> plainAccessConfigs) {
-        this.plainAccessConfigs = plainAccessConfigs;
+        SelectBufferResult result = new SelectBufferResult(buffer, startOffset, size, tagCode);
+        Assert.assertEquals(buffer, result.getByteBuffer());
+        Assert.assertEquals(startOffset, result.getStartOffset());
+        Assert.assertEquals(size, result.getSize());
+        Assert.assertEquals(tagCode, result.getTagCode());
     }
 }

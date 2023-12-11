@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.client.producer;
 
-import org.apache.rocketmq.common.message.Message;
+package org.apache.rocketmq.remoting.netty;
 
-/**
- * @deprecated This interface will be removed in the version 5.0.0, interface {@link TransactionListener} is recommended.
- */
-@Deprecated
-public interface LocalTransactionExecuter {
-    LocalTransactionState executeLocalTransactionBranch(final Message msg, final Object arg);
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.local.LocalChannel;
+
+public class MockChannel extends LocalChannel {
+    @Override
+    public ChannelFuture writeAndFlush(Object msg) {
+        return new MockChannelPromise(MockChannel.this);
+    }
 }
