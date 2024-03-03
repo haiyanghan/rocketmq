@@ -46,6 +46,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -190,8 +191,8 @@ public class DefaultMessageStore implements MessageStore {
 
     private SendMessageBackHook sendMessageBackHook;
 
-    private final ConcurrentMap<Integer /* level */, Long/* delay timeMillis */> delayLevelTable =
-        new ConcurrentHashMap<>(32);
+    private final ConcurrentSkipListMap<Integer /* level */, Long/* delay timeMillis */> delayLevelTable =
+        new ConcurrentSkipListMap<>();
 
     private int maxDelayLevel;
 
@@ -827,7 +828,7 @@ public class DefaultMessageStore implements MessageStore {
                 status = GetMessageStatus.OFFSET_OVERFLOW_BADLY;
                 nextBeginOffset = nextOffsetCorrection(offset, maxOffset);
             } else {
-                final int maxFilterMessageSize = Math.max(16000, maxMsgNums * consumeQueue.getUnitSize());
+                final int maxFilterMessageSize = Math.max(this.messageStoreConfig.getMaxFilterMessageSize(), maxMsgNums * consumeQueue.getUnitSize());
                 final boolean diskFallRecorded = this.messageStoreConfig.isDiskFallRecorded();
 
                 long maxPullSize = Math.max(maxTotalMsgSize, 100);
@@ -2182,7 +2183,7 @@ public class DefaultMessageStore implements MessageStore {
             System.getProperty("rocketmq.broker.diskSpaceCleanForciblyRatio", "");
         private long lastRedeleteTimestamp = 0;
 
-        private volatile int manualDeleteFileSeveralTimes = 0;
+        private final AtomicInteger manualDeleteFileSeveralTimes = new AtomicInteger();
 
         private volatile boolean cleanImmediately = false;
 
@@ -2225,7 +2226,7 @@ public class DefaultMessageStore implements MessageStore {
         }
 
         public void executeDeleteFilesManually() {
-            this.manualDeleteFileSeveralTimes = MAX_MANUAL_DELETE_FILE_TIMES;
+            this.manualDeleteFileSeveralTimes.set(MAX_MANUAL_DELETE_FILE_TIMES);
             DefaultMessageStore.LOGGER.info("executeDeleteFilesManually was invoked");
         }
 
@@ -2247,12 +2248,12 @@ public class DefaultMessageStore implements MessageStore {
 
             boolean isTimeUp = this.isTimeToDelete();
             boolean isUsageExceedsThreshold = this.isSpaceToDelete();
-            boolean isManualDelete = this.manualDeleteFileSeveralTimes > 0;
+            boolean isManualDelete = this.manualDeleteFileSeveralTimes.get() > 0;
 
             if (isTimeUp || isUsageExceedsThreshold || isManualDelete) {
 
                 if (isManualDelete) {
-                    this.manualDeleteFileSeveralTimes--;
+                    this.manualDeleteFileSeveralTimes.decrementAndGet();
                 }
 
                 boolean cleanAtOnce = DefaultMessageStore.this.getMessageStoreConfig().isCleanFileForciblyEnable() && this.cleanImmediately;
@@ -2261,7 +2262,7 @@ public class DefaultMessageStore implements MessageStore {
                     fileReservedTime,
                     isTimeUp,
                     isUsageExceedsThreshold,
-                    manualDeleteFileSeveralTimes,
+                    manualDeleteFileSeveralTimes.get(),
                     cleanAtOnce,
                     deleteFileBatchMax);
 
@@ -2406,11 +2407,11 @@ public class DefaultMessageStore implements MessageStore {
         }
 
         public int getManualDeleteFileSeveralTimes() {
-            return manualDeleteFileSeveralTimes;
+            return manualDeleteFileSeveralTimes.get();
         }
 
         public void setManualDeleteFileSeveralTimes(int manualDeleteFileSeveralTimes) {
-            this.manualDeleteFileSeveralTimes = manualDeleteFileSeveralTimes;
+            this.manualDeleteFileSeveralTimes.set(manualDeleteFileSeveralTimes);
         }
 
         public double calcStorePathPhysicRatio() {
