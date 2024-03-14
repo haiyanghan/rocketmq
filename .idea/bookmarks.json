@@ -1,0 +1,137 @@
+[
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Broker] 从StoreService中获取消息",
+    "index": 0,
+    "fileDescriptor": "$/store/src/main/java/org/apache/rocketmq/store/DefaultMessageStore.java",
+    "linenumber": 751,
+    "group": "Broker",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Broker] 处理消息拉取请求",
+    "index": 0,
+    "fileDescriptor": "$/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java",
+    "linenumber": 300,
+    "group": "Broker",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Broker] 处理客户端心跳",
+    "index": 0,
+    "fileDescriptor": "$/broker/src/main/java/org/apache/rocketmq/broker/processor/ClientManageProcessor.java",
+    "linenumber": 54,
+    "group": "Broker",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Broker] 存储客户端发送的消息",
+    "index": 0,
+    "fileDescriptor": "$/broker/src/main/java/org/apache/rocketmq/broker/processor/SendMessageProcessor.java",
+    "linenumber": 82,
+    "group": "Broker",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Broker] 收到客户端 reply消息",
+    "index": 0,
+    "fileDescriptor": "$/broker/src/main/java/org/apache/rocketmq/broker/processor/AckMessageProcessor.java",
+    "linenumber": 104,
+    "group": "Broker",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 消费者拉取消息（定时）",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/PullMessageService.java",
+    "linenumber": 117,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 客户端发送心跳（定时）",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/factory/MQClientInstance.java",
+    "linenumber": 299,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 消费者重分配队列",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/RebalanceImpl.java",
+    "linenumber": 236,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 构建队列PullRequest",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/RebalanceImpl.java",
+    "linenumber": 472,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] defaultTopicQueueNums",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/producer/DefaultMQProducer.java",
+    "linenumber": 95,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 消费者拉取消息回调",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/consumer/DefaultMQPushConsumerImpl.java",
+    "linenumber": 345,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 生产者者收到reply回调",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/ClientRemotingProcessor.java",
+    "linenumber": 277,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "BOOKMARK",
+    "name": "[Client] 消费者定时上传消费偏移量",
+    "index": 0,
+    "fileDescriptor": "$/client/src/main/java/org/apache/rocketmq/client/impl/factory/MQClientInstance.java",
+    "linenumber": 307,
+    "group": "Client",
+    "bookmarkType": "DEFAULT"
+  },
+  {
+    "elementType": "GROUP",
+    "name": "rocketmq",
+    "index": 0,
+    "linenumber": 0
+  },
+  {
+    "elementType": "GROUP",
+    "name": "Broker",
+    "index": 0,
+    "linenumber": 0
+  },
+  {
+    "elementType": "GROUP",
+    "name": "Client",
+    "index": 0,
+    "linenumber": 0
+  }
+]
