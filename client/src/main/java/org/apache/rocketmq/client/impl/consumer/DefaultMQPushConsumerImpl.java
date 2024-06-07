@@ -581,8 +581,6 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                         DefaultMQPushConsumerImpl.this.executePopPullRequestImmediately(popRequest);
                         break;
                     case POLLING_FULL:
-                        DefaultMQPushConsumerImpl.this.executePopPullRequestLater(popRequest, pullTimeDelayMillsWhenException);
-                        break;
                     default:
                         DefaultMQPushConsumerImpl.this.executePopPullRequestLater(popRequest, pullTimeDelayMillsWhenException);
                         break;
@@ -1309,9 +1307,9 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         this.consumeMessageService.updateCorePoolSize(corePoolSize);
     }
 
-    public MessageExt viewMessage(String msgId)
+    public MessageExt viewMessage(String topic, String msgId)
         throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
-        return this.mQClientFactory.getMQAdminImpl().viewMessage(msgId);
+        return this.mQClientFactory.getMQAdminImpl().viewMessage(topic, msgId);
     }
 
     public RebalanceImpl getRebalanceImpl() {
