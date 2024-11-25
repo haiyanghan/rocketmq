@@ -148,6 +148,8 @@ public class RequestCode {
 
     public static final int GET_TOPICS_BY_CLUSTER = 224;
 
+    public static final int UPDATE_AND_CREATE_SUBSCRIPTIONGROUP_LIST = 225;
+
     public static final int QUERY_TOPICS_BY_CONSUMER = 343;
     public static final int QUERY_SUBSCRIPTION_BY_CONSUMER = 345;
 
@@ -215,6 +217,7 @@ public class RequestCode {
 
     public static final int GET_SUBSCRIPTIONGROUP_CONFIG = 352;
     public static final int UPDATE_AND_GET_GROUP_FORBIDDEN = 353;
+    public static final int CHECK_ROCKSDB_CQ_WRITE_PROGRESS = 354;
 
     public static final int LITE_PULL_MESSAGE = 361;
 

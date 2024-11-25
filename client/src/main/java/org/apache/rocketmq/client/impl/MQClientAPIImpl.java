@@ -56,6 +56,7 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.client.rpchook.NamespaceRpcHook;
 import org.apache.rocketmq.common.BoundaryType;
+import org.apache.rocketmq.common.CheckRocksdbCqWriteResult;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.common.Pair;
@@ -78,6 +79,7 @@ import org.apache.rocketmq.common.namesrv.NameServerUpdateCallback;
 import org.apache.rocketmq.common.namesrv.TopAddressing;
 import org.apache.rocketmq.common.sysflag.PullSysFlag;
 import org.apache.rocketmq.common.topic.TopicValidator;
+import org.apache.rocketmq.common.utils.StartAndShutdown;
 import org.apache.rocketmq.logging.org.slf4j.Logger;
 import org.apache.rocketmq.logging.org.slf4j.LoggerFactory;
 import org.apache.rocketmq.remoting.ChannelEventListener;
@@ -137,6 +139,7 @@ import org.apache.rocketmq.remoting.protocol.body.QuerySubscriptionResponseBody;
 import org.apache.rocketmq.remoting.protocol.body.QueueTimeSpan;
 import org.apache.rocketmq.remoting.protocol.body.ResetOffsetBody;
 import org.apache.rocketmq.remoting.protocol.body.SetMessageRequestModeRequestBody;
+import org.apache.rocketmq.remoting.protocol.body.SubscriptionGroupList;
 import org.apache.rocketmq.remoting.protocol.body.SubscriptionGroupWrapper;
 import org.apache.rocketmq.remoting.protocol.body.TopicConfigSerializeWrapper;
 import org.apache.rocketmq.remoting.protocol.body.TopicList;
@@ -146,6 +149,7 @@ import org.apache.rocketmq.remoting.protocol.header.AckMessageRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.AddBrokerRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.ChangeInvisibleTimeRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.ChangeInvisibleTimeResponseHeader;
+import org.apache.rocketmq.remoting.protocol.header.CheckRocksdbCqWriteProgressRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.CloneGroupOffsetRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.ConsumeMessageDirectlyResultRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.ConsumerSendMsgBackRequestHeader;
@@ -183,9 +187,9 @@ import org.apache.rocketmq.remoting.protocol.header.GetTopicConfigRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.GetTopicStatsInfoRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.GetTopicsByClusterRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.GetUserRequestHeader;
+import org.apache.rocketmq.remoting.protocol.header.HeartbeatRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.ListAclsRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.ListUsersRequestHeader;
-import org.apache.rocketmq.remoting.protocol.header.HeartbeatRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.LockBatchMqRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.PopMessageRequestHeader;
 import org.apache.rocketmq.remoting.protocol.header.PopMessageResponseHeader;
@@ -246,7 +250,7 @@ import org.apache.rocketmq.remoting.rpchook.StreamTypeRPCHook;
 
 import static org.apache.rocketmq.remoting.protocol.RemotingSysResponseCode.SUCCESS;
 
-public class MQClientAPIImpl implements NameServerUpdateCallback {
+public class MQClientAPIImpl implements NameServerUpdateCallback, StartAndShutdown {
     private final static Logger log = LoggerFactory.getLogger(MQClientAPIImpl.class);
     private static boolean sendSmartMsg =
         Boolean.parseBoolean(System.getProperty("org.apache.rocketmq.client.sendSmartMsg", "true"));
@@ -398,6 +402,22 @@ public class MQClientAPIImpl implements NameServerUpdateCallback {
 
         throw new MQClientException(response.getCode(), response.getRemark());
 
+    }
+
+    public void createSubscriptionGroupList(final String address, final List<SubscriptionGroupConfig> configs,
+        final long timeoutMillis) throws RemotingException, InterruptedException, MQClientException {
+        RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.UPDATE_AND_CREATE_SUBSCRIPTIONGROUP_LIST, null);
+        SubscriptionGroupList requestBody = new SubscriptionGroupList(configs);
+        request.setBody(requestBody.encode());
+
+        RemotingCommand response = this.remotingClient.invokeSync(
+            MixAll.brokerVIPChannel(this.clientConfig.isVipChannelEnabled(), address), request, timeoutMillis);
+        assert response != null;
+        if (response.getCode() == ResponseCode.SUCCESS) {
+            return;
+        }
+
+        throw new MQClientException(response.getCode(), response.getRemark());
     }
 
     public void createTopic(final String addr, final String defaultTopic, final TopicConfig topicConfig,
@@ -1179,9 +1199,9 @@ public class MQClientAPIImpl implements NameServerUpdateCallback {
                             messageExt.getProperty(MessageConst.PROPERTY_INNER_MULTI_DISPATCH))) {
                             // process LMQ
                             String[] queues = messageExt.getProperty(MessageConst.PROPERTY_INNER_MULTI_DISPATCH)
-                                .split(MixAll.MULTI_DISPATCH_QUEUE_SPLITTER);
+                                .split(MixAll.LMQ_DISPATCH_SEPARATOR);
                             String[] queueOffsets = messageExt.getProperty(MessageConst.PROPERTY_INNER_MULTI_QUEUE_OFFSET)
-                                .split(MixAll.MULTI_DISPATCH_QUEUE_SPLITTER);
+                                .split(MixAll.LMQ_DISPATCH_SEPARATOR);
                             long offset = Long.parseLong(queueOffsets[ArrayUtils.indexOf(queues, topic)]);
                             // LMQ topic has only 1 queue, which queue id is 0
                             queueIdKey = ExtraInfoUtil.getStartOffsetInfoMapKey(topic, MixAll.LMQ_QUEUE_ID);
@@ -1244,9 +1264,9 @@ public class MQClientAPIImpl implements NameServerUpdateCallback {
                 && StringUtils.isNotEmpty(messageExt.getProperty(MessageConst.PROPERTY_INNER_MULTI_DISPATCH))) {
                 // process LMQ
                 String[] queues = messageExt.getProperty(MessageConst.PROPERTY_INNER_MULTI_DISPATCH)
-                    .split(MixAll.MULTI_DISPATCH_QUEUE_SPLITTER);
+                    .split(MixAll.LMQ_DISPATCH_SEPARATOR);
                 String[] queueOffsets = messageExt.getProperty(MessageConst.PROPERTY_INNER_MULTI_QUEUE_OFFSET)
-                    .split(MixAll.MULTI_DISPATCH_QUEUE_SPLITTER);
+                    .split(MixAll.LMQ_DISPATCH_SEPARATOR);
                 // LMQ topic has only 1 queue, which queue id is 0
                 key = ExtraInfoUtil.getStartOffsetInfoMapKey(topic, MixAll.LMQ_QUEUE_ID);
                 sortMap.putIfAbsent(key, new ArrayList<>(4));
@@ -1599,10 +1619,10 @@ public class MQClientAPIImpl implements NameServerUpdateCallback {
         final QueryMessageRequestHeader requestHeader,
         final long timeoutMillis,
         final InvokeCallback invokeCallback,
-        final Boolean isUnqiueKey
+        final Boolean isUniqueKey
     ) throws RemotingException, MQBrokerException, InterruptedException {
         RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.QUERY_MESSAGE, requestHeader);
-        request.addExtField(MixAll.UNIQUE_MSG_QUERY_FLAG, isUnqiueKey.toString());
+        request.addExtField(MixAll.UNIQUE_MSG_QUERY_FLAG, isUniqueKey.toString());
         this.remotingClient.invokeAsync(MixAll.brokerVIPChannel(this.clientConfig.isVipChannelEnabled(), addr), request, timeoutMillis,
             invokeCallback);
     }
@@ -2996,6 +3016,20 @@ public class MQClientAPIImpl implements NameServerUpdateCallback {
             return QueryConsumeQueueResponseBody.decode(response.getBody(), QueryConsumeQueueResponseBody.class);
         }
 
+        throw new MQClientException(response.getCode(), response.getRemark());
+    }
+
+    public CheckRocksdbCqWriteResult checkRocksdbCqWriteProgress(final String brokerAddr, final String topic, final long checkStoreTime, final long timeoutMillis) throws InterruptedException,
+        RemotingTimeoutException, RemotingSendRequestException, RemotingConnectException, MQClientException {
+        CheckRocksdbCqWriteProgressRequestHeader header = new CheckRocksdbCqWriteProgressRequestHeader();
+        header.setTopic(topic);
+        header.setCheckStoreTime(checkStoreTime);
+        RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.CHECK_ROCKSDB_CQ_WRITE_PROGRESS, header);
+        RemotingCommand response = this.remotingClient.invokeSync(brokerAddr, request, timeoutMillis);
+        assert response != null;
+        if (ResponseCode.SUCCESS == response.getCode()) {
+            return JSON.parseObject(response.getBody(), CheckRocksdbCqWriteResult.class);
+        }
         throw new MQClientException(response.getCode(), response.getRemark());
     }
 

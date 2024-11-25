@@ -88,6 +88,8 @@ public class DefaultMQPullConsumer extends ClientConfig implements MQPullConsume
 
     private int maxReconsumeTimes = 16;
 
+    private boolean enableRebalance = true;
+
     public DefaultMQPullConsumer() {
         this(MixAll.DEFAULT_CONSUMER_GROUP, null);
     }
@@ -262,7 +264,7 @@ public class DefaultMQPullConsumer extends ClientConfig implements MQPullConsume
     public void sendMessageBack(MessageExt msg, int delayLevel)
         throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
         msg.setTopic(withNamespace(msg.getTopic()));
-        this.defaultMQPullConsumerImpl.sendMessageBack(msg, delayLevel, null);
+        this.defaultMQPullConsumerImpl.sendMessageBack(msg, delayLevel, msg.getBrokerName());
     }
 
     /**
@@ -467,5 +469,13 @@ public class DefaultMQPullConsumer extends ClientConfig implements MQPullConsume
 
     public void persist(MessageQueue mq) {
         this.getOffsetStore().persist(queueWithNamespace(mq));
+    }
+
+    public boolean isEnableRebalance() {
+        return enableRebalance;
+    }
+
+    public void setEnableRebalance(boolean enableRebalance) {
+        this.enableRebalance = enableRebalance;
     }
 }

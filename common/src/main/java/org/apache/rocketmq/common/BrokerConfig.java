@@ -17,6 +17,7 @@
 package org.apache.rocketmq.common;
 
 import org.apache.rocketmq.common.annotation.ImportantField;
+import org.apache.rocketmq.common.config.ConfigManagerVersion;
 import org.apache.rocketmq.common.constant.PermName;
 import org.apache.rocketmq.common.message.MessageRequestMode;
 import org.apache.rocketmq.common.metrics.MetricsExporterType;
@@ -186,6 +187,11 @@ public class BrokerConfig extends BrokerIdentity {
     private int registerNameServerPeriod = 1000 * 30;
 
     /**
+     * This configurable item defines interval of update name server address. Default: 120 * 1000 milliseconds
+     */
+    private int updateNameServerAddrPeriod = 1000 * 120;
+
+    /**
      * the interval to send heartbeat to name server for liveness detection.
      */
     private int brokerHeartbeatInterval = 1000;
@@ -221,12 +227,15 @@ public class BrokerConfig extends BrokerIdentity {
     private int popCkMaxBufferSize = 200000;
     private int popCkOffsetMaxQueueSize = 20000;
     private boolean enablePopBatchAck = false;
+    // set the interval to the maxFilterMessageSize in MessageStoreConfig divided by the cq unit size
+    private long popLongPollingForceNotifyInterval = 800;
+    private boolean enableNotifyBeforePopCalculateLag = true;
     private boolean enableNotifyAfterPopOrderLockRelease = true;
     private boolean initPopOffsetByCheckMsgInMem = true;
     // read message from pop retry topic v1, for the compatibility, will be removed in the future version
     private boolean retrieveMessageFromPopRetryTopicV1 = true;
     private boolean enableRetryTopicV2 = false;
-
+    private int popFromRetryProbability = 20;
     private boolean realTimeNotifyConsumerChange = true;
 
     private boolean litePullMessageEnable = true;
@@ -288,7 +297,7 @@ public class BrokerConfig extends BrokerIdentity {
 
     private boolean enableDetailStat = true;
 
-    private boolean autoDeleteUnusedStats = false;
+    private boolean autoDeleteUnusedStats = true;
 
     /**
      * Whether to distinguish log paths when multiple brokers are deployed on the same machine
@@ -418,6 +427,21 @@ public class BrokerConfig extends BrokerIdentity {
      * Try to update configures in black list by restart process.
      */
     private String configBlackList = "configBlackList;brokerConfigPath";
+
+    // if false, will still rewrite ck after max times 17
+    private boolean skipWhenCKRePutReachMaxTimes = false;
+
+    private boolean appendAckAsync = false;
+
+    private boolean appendCkAsync = false;
+
+
+    private boolean enableLmqStats = false;
+
+    /**
+     * V2 is recommended in cases where LMQ feature is extensively used.
+     */
+    private String configManagerVersion = ConfigManagerVersion.V1.getVersion();
 
     public String getConfigBlackList() {
         return configBlackList;
@@ -554,6 +578,15 @@ public class BrokerConfig extends BrokerIdentity {
     public void setEnablePopLog(boolean enablePopLog) {
         this.enablePopLog = enablePopLog;
     }
+
+    public int getPopFromRetryProbability() {
+        return popFromRetryProbability;
+    }
+
+    public void setPopFromRetryProbability(int popFromRetryProbability) {
+        this.popFromRetryProbability = popFromRetryProbability;
+    }
+
 
     public boolean isTraceOn() {
         return traceOn;
@@ -1299,6 +1332,22 @@ public class BrokerConfig extends BrokerIdentity {
         this.enableNetWorkFlowControl = enableNetWorkFlowControl;
     }
 
+    public long getPopLongPollingForceNotifyInterval() {
+        return popLongPollingForceNotifyInterval;
+    }
+
+    public void setPopLongPollingForceNotifyInterval(long popLongPollingForceNotifyInterval) {
+        this.popLongPollingForceNotifyInterval = popLongPollingForceNotifyInterval;
+    }
+
+    public boolean isEnableNotifyBeforePopCalculateLag() {
+        return enableNotifyBeforePopCalculateLag;
+    }
+
+    public void setEnableNotifyBeforePopCalculateLag(boolean enableNotifyBeforePopCalculateLag) {
+        this.enableNotifyBeforePopCalculateLag = enableNotifyBeforePopCalculateLag;
+    }
+
     public boolean isEnableNotifyAfterPopOrderLockRelease() {
         return enableNotifyAfterPopOrderLockRelease;
     }
@@ -1825,5 +1874,53 @@ public class BrokerConfig extends BrokerIdentity {
 
     public void setEnablePopMessageThreshold(boolean enablePopMessageThreshold) {
         this.enablePopMessageThreshold = enablePopMessageThreshold;
+    }
+
+    public boolean isSkipWhenCKRePutReachMaxTimes() {
+        return skipWhenCKRePutReachMaxTimes;
+    }
+
+    public void setSkipWhenCKRePutReachMaxTimes(boolean skipWhenCKRePutReachMaxTimes) {
+        this.skipWhenCKRePutReachMaxTimes = skipWhenCKRePutReachMaxTimes;
+    }
+
+    public int getUpdateNameServerAddrPeriod() {
+        return updateNameServerAddrPeriod;
+    }
+
+    public void setUpdateNameServerAddrPeriod(int updateNameServerAddrPeriod) {
+        this.updateNameServerAddrPeriod = updateNameServerAddrPeriod;
+    }
+
+    public boolean isAppendAckAsync() {
+        return appendAckAsync;
+    }
+
+    public void setAppendAckAsync(boolean appendAckAsync) {
+        this.appendAckAsync = appendAckAsync;
+    }
+
+    public boolean isAppendCkAsync() {
+        return appendCkAsync;
+    }
+
+    public void setAppendCkAsync(boolean appendCkAsync) {
+        this.appendCkAsync = appendCkAsync;
+    }
+
+    public boolean isEnableLmqStats() {
+        return enableLmqStats;
+    }
+
+    public void setEnableLmqStats(boolean enableLmqStats) {
+        this.enableLmqStats = enableLmqStats;
+    }
+
+    public String getConfigManagerVersion() {
+        return configManagerVersion;
+    }
+
+    public void setConfigManagerVersion(String configManagerVersion) {
+        this.configManagerVersion = configManagerVersion;
     }
 }
