@@ -236,6 +236,13 @@ public class BrokerConfig extends BrokerIdentity {
     private boolean retrieveMessageFromPopRetryTopicV1 = true;
     private boolean enableRetryTopicV2 = false;
     private int popFromRetryProbability = 20;
+    private boolean popConsumerFSServiceInit = true;
+    private boolean popConsumerKVServiceLog = false;
+    private boolean popConsumerKVServiceInit = false;
+    private boolean popConsumerKVServiceEnable = false;
+    private int popReviveMaxReturnSizePerRead = 16 * 1024;
+    private int popReviveMaxAttemptTimes = 16;
+
     private boolean realTimeNotifyConsumerChange = true;
 
     private boolean litePullMessageEnable = true;
@@ -435,6 +442,7 @@ public class BrokerConfig extends BrokerIdentity {
 
     private boolean appendCkAsync = false;
 
+    private boolean clearRetryTopicWhenDeleteTopic = true;
 
     private boolean enableLmqStats = false;
 
@@ -442,6 +450,8 @@ public class BrokerConfig extends BrokerIdentity {
      * V2 is recommended in cases where LMQ feature is extensively used.
      */
     private String configManagerVersion = ConfigManagerVersion.V1.getVersion();
+
+    private boolean allowRecallWhenBrokerNotWriteable = true;
 
     public String getConfigBlackList() {
         return configBlackList;
@@ -587,6 +597,53 @@ public class BrokerConfig extends BrokerIdentity {
         this.popFromRetryProbability = popFromRetryProbability;
     }
 
+    public boolean isPopConsumerFSServiceInit() {
+        return popConsumerFSServiceInit;
+    }
+
+    public void setPopConsumerFSServiceInit(boolean popConsumerFSServiceInit) {
+        this.popConsumerFSServiceInit = popConsumerFSServiceInit;
+    }
+
+    public boolean isPopConsumerKVServiceLog() {
+        return popConsumerKVServiceLog;
+    }
+
+    public void setPopConsumerKVServiceLog(boolean popConsumerKVServiceLog) {
+        this.popConsumerKVServiceLog = popConsumerKVServiceLog;
+    }
+
+    public boolean isPopConsumerKVServiceInit() {
+        return popConsumerKVServiceInit;
+    }
+
+    public void setPopConsumerKVServiceInit(boolean popConsumerKVServiceInit) {
+        this.popConsumerKVServiceInit = popConsumerKVServiceInit;
+    }
+
+    public boolean isPopConsumerKVServiceEnable() {
+        return popConsumerKVServiceEnable;
+    }
+
+    public void setPopConsumerKVServiceEnable(boolean popConsumerKVServiceEnable) {
+        this.popConsumerKVServiceEnable = popConsumerKVServiceEnable;
+    }
+
+    public int getPopReviveMaxReturnSizePerRead() {
+        return popReviveMaxReturnSizePerRead;
+    }
+
+    public void setPopReviveMaxReturnSizePerRead(int popReviveMaxReturnSizePerRead) {
+        this.popReviveMaxReturnSizePerRead = popReviveMaxReturnSizePerRead;
+    }
+
+    public int getPopReviveMaxAttemptTimes() {
+        return popReviveMaxAttemptTimes;
+    }
+
+    public void setPopReviveMaxAttemptTimes(int popReviveMaxAttemptTimes) {
+        this.popReviveMaxAttemptTimes = popReviveMaxAttemptTimes;
+    }
 
     public boolean isTraceOn() {
         return traceOn;
@@ -1908,6 +1965,14 @@ public class BrokerConfig extends BrokerIdentity {
         this.appendCkAsync = appendCkAsync;
     }
 
+    public boolean isClearRetryTopicWhenDeleteTopic() {
+        return clearRetryTopicWhenDeleteTopic;
+    }
+
+    public void setClearRetryTopicWhenDeleteTopic(boolean clearRetryTopicWhenDeleteTopic) {
+        this.clearRetryTopicWhenDeleteTopic = clearRetryTopicWhenDeleteTopic;
+    }
+
     public boolean isEnableLmqStats() {
         return enableLmqStats;
     }
@@ -1922,5 +1987,13 @@ public class BrokerConfig extends BrokerIdentity {
 
     public void setConfigManagerVersion(String configManagerVersion) {
         this.configManagerVersion = configManagerVersion;
+    }
+
+    public boolean isAllowRecallWhenBrokerNotWriteable() {
+        return allowRecallWhenBrokerNotWriteable;
+    }
+
+    public void setAllowRecallWhenBrokerNotWriteable(boolean allowRecallWhenBrokerNotWriteable) {
+        this.allowRecallWhenBrokerNotWriteable = allowRecallWhenBrokerNotWriteable;
     }
 }
